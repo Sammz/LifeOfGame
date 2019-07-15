@@ -34,20 +34,21 @@ class Clock(Thread):
         self.grid_index = 0
 
     def run(self) -> None:
-        for x in range(0, c.x_amount_cells):
-            for y in range(0, c.y_amount_cells):
-                old_grid_status = self.grids[self.grid_index][x][y]
-                self.window.draw(x, y, old_grid_status)
-
+        self.draw_first_frame()
         while True:
             other_grid_index = (self.grid_index + 1) % 2
-
             self.calculate_next_frame(other_grid_index)
             self.window.delete_all_alive()
             self.draw_next_frame(other_grid_index)
-
             self.grid_index = other_grid_index
             self.checks_and_sleeps()
+
+    def draw_first_frame(self):
+        for x in range(0, c.x_amount_cells):
+            for y in range(0, c.y_amount_cells):
+                old_grid_status = self.grids[self.grid_index][x][y]
+                if old_grid_status:
+                    self.window.draw(x, y, old_grid_status)
 
     def checks_and_sleeps(self):
         global pause

@@ -42,9 +42,9 @@ class Screen:
         self.canvas.delete(c.alive_color)
 
     def draw(self, x, y, alive):
-        color = c.dead_color
-        if alive:
-            color = c.alive_color
         x = x * c.cell_width
         y = y * c.cell_height
-        self.canvas.create_rectangle(x, y, x + c.cell_width, y + c.cell_height, fill=color)
+        if alive:
+            self.canvas.create_rectangle(x, y, x + c.cell_width, y + c.cell_height, fill=c.alive_color)
+        else:
+            self.canvas.delete(self.canvas.find_closest(x+0.5*c.cell_width, y+0.5*c.cell_height))
