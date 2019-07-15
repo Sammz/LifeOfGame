@@ -32,7 +32,6 @@ class Screen:
         self.canvas.bind("r", random)
         self.canvas.bind("c", clear)
         self.canvas.bind("<Button-1>", click)
-
         self.canvas.configure(background=c.dead_color)
         self.canvas.focus_set()
         self.canvas.pack()
@@ -47,4 +46,4 @@ class Screen:
         if alive:
             self.canvas.create_rectangle(x, y, x + c.cell_width, y + c.cell_height, fill=c.alive_color)
         else:
-            self.canvas.delete(self.canvas.find_closest(x+0.5*c.cell_width, y+0.5*c.cell_height))
+            self.canvas.delete(self.canvas.find_closest(x + 0.5 * c.cell_width, y + 0.5 * c.cell_height))

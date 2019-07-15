@@ -41,7 +41,7 @@ class Clock(Thread):
             self.window.delete_all_alive()
             self.draw_next_frame(other_grid_index)
             self.grid_index = other_grid_index
-            self.checks_and_sleeps()
+            self.check_for_changes_and_sleeps()
 
     def draw_first_frame(self):
         for x in range(0, c.x_amount_cells):
@@ -50,16 +50,16 @@ class Clock(Thread):
                 if old_grid_status:
                     self.window.draw(x, y, old_grid_status)
 
-    def checks_and_sleeps(self):
+    def check_for_changes_and_sleeps(self):
         global pause
         if pause:
             while pause:
                 global new_cell_to_change
                 if new_cell_to_change:
                     self.change_cell_status()
-                sleep(0.1)
+                sleep(0.15)
         else:
-            sleep(0.5)
+            sleep(c.update_time)
 
     def calculate_next_frame(self, other_grid_index):
         for x in range(0, c.x_amount_cells):
@@ -101,7 +101,7 @@ class Clock(Thread):
             return True
 
     def safe_get(self, x, y):
+        result = False
         if 0 <= x < len(self.grids[self.grid_index]) and 0 <= y < len(self.grids[self.grid_index][x]):
-            return self.grids[self.grid_index][x][y]
-        else:
-            return False
+            result = self.grids[self.grid_index][x][y]
+        return result

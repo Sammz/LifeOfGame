@@ -6,7 +6,7 @@ import random
 
 tk_screen = Tk()
 grid = [[bool(random.getrandbits(1)) for i in range(0, c.y_amount_cells)] for k in range(0, c.x_amount_cells)]
-#grid = [[False for i in range(0, c.y_amount_cells)] for k in range(0, c.x_amount_cells)]
+# grid = [[False for i in range(0, c.y_amount_cells)] for k in range(0, c.x_amount_cells)]
 
 
 grid2 = [[False for i in range(0, c.y_amount_cells)] for k in range(0, c.x_amount_cells)]
