@@ -1,14 +1,14 @@
 from tkinter import Tk, Canvas
 import config as c
-from clock import pause_clock, on_click_change
+from clock import pause_clock, on_click_change, clear_grids, start_random
 
 
 def random(event):
-    pass
+    start_random()
 
 
 def clear(event):
-    pass
+    clear_grids()
 
 
 def pause(event):
@@ -37,13 +37,21 @@ class Screen:
         self.canvas.pack()
         self.canvas.mainloop()
 
-    def delete_all_alive(self):
-        self.canvas.delete(c.alive_color)
+    def draw_pause(self):
+        x = c.cell_width * 4
+        y = c.cell_height * 5
+        return self.canvas.create_text(x, y, fill=c.pause_color, text="II", font=("arial", 50))
 
-    def draw(self, x, y, alive):
+    def draw_cell(self, x, y, alive):
         x = x * c.cell_width
         y = y * c.cell_height
         if alive:
-            self.canvas.create_rectangle(x, y, x + c.cell_width, y + c.cell_height, fill=c.alive_color)
+            self.canvas.create_rectangle(x, y, x + c.cell_width, y + c.cell_height, fill=c.alive_color, tag="cell")
         else:
             self.canvas.delete(self.canvas.find_closest(x + 0.5 * c.cell_width, y + 0.5 * c.cell_height))
+
+    def delete_cells(self):
+        self.canvas.delete("cell")
+
+
+

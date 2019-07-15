@@ -1,13 +1,14 @@
 dead_color = "black"
-alive_color = "blue"
+alive_color = "green"
+pause_color = "red"
 
+start_random = True
 update_time = 0.4
 
-x_amount_cells = 40
-y_amount_cells = 40
+x_cells = 70
+y_cells = 40
+cell_width = 20
+cell_height = 20
 
-cell_width = 15
-cell_height = 15
-
-window_width = x_amount_cells * cell_width
-window_height = y_amount_cells * cell_height
+window_width = x_cells * cell_width
+window_height = y_cells * cell_height

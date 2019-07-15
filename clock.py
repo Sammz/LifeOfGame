@@ -1,9 +1,13 @@
 from threading import Thread, Lock
 from time import sleep
 import config as c
+import random
 
 pause = False
-change_alive_lock = Lock()
+clear = False
+random_begin = False
+
+change_cell_status_lock = Lock()
 cell_to_change_x = 0
 cell_to_change_y = 0
 new_cell_to_change = False
@@ -14,12 +18,20 @@ def pause_clock():
     pause = not pause
 
 
+def clear_grids():
+    global clear
+    clear = True
+
+
+def start_random():
+    global random_begin
+    random_begin = True
+
+
 def on_click_change(x, y):
     if pause:
-        with change_alive_lock:
-            global cell_to_change_x
-            global cell_to_change_y
-            global new_cell_to_change
+        with change_cell_status_lock:
+            global cell_to_change_x, cell_to_change_y, new_cell_to_change
             cell_to_change_x = x
             cell_to_change_y = y
             new_cell_to_change = True
@@ -27,64 +39,87 @@ def on_click_change(x, y):
 
 class Clock(Thread):
 
-    def __init__(self, grid: [[]], grid2: [[]], window):
+    def __init__(self, window):
         super().__init__()
         self.window = window
-        self.grids = [grid, grid2]
+        self.grids = self.init_grids(c.start_random)
         self.grid_index = 0
 
+    def init_grids(self, random_grid):
+        control_grid = [[random_grid for i in range(0, c.y_cells)] for k in range(0, c.x_cells)]
+        if random_grid:
+            grid = [[bool(random.getrandbits(1)) for i in range(0, c.y_cells)] for k in range(0, c.x_cells)]
+            return [grid, control_grid]
+        grid = [[random_grid for i in range(0, c.y_cells)] for k in range(0, c.x_cells)]
+        return [grid, control_grid]
+
     def run(self) -> None:
+        global pause
+
         self.draw_first_frame()
         while True:
             other_grid_index = (self.grid_index + 1) % 2
             self.calculate_next_frame(other_grid_index)
-            self.window.delete_all_alive()
             self.draw_next_frame(other_grid_index)
             self.grid_index = other_grid_index
-            self.check_for_changes_and_sleeps()
+            if pause:
+                self.pause_and_handle_user_input()
+            else:
+                sleep(c.update_time)
 
     def draw_first_frame(self):
-        for x in range(0, c.x_amount_cells):
-            for y in range(0, c.y_amount_cells):
+        for x in range(0, c.x_cells):
+            for y in range(0, c.y_cells):
                 old_grid_status = self.grids[self.grid_index][x][y]
                 if old_grid_status:
-                    self.window.draw(x, y, old_grid_status)
+                    self.window.draw_cell(x, y, old_grid_status)
 
-    def check_for_changes_and_sleeps(self):
-        global pause
-        if pause:
-            while pause:
-                global new_cell_to_change
-                if new_cell_to_change:
-                    self.change_cell_status()
-                sleep(0.15)
-        else:
-            sleep(c.update_time)
+    def pause_and_handle_user_input(self):
+        global pause, new_cell_to_change, random_begin, clear
+        pause_id = self.window.draw_pause()
+
+        while pause:
+            if new_cell_to_change:
+                self.change_cell_status()
+                new_cell_to_change = False
+            if random_begin:
+                self.grids = self.init_grids(True)
+                self.window.delete_cells()
+                self.grid_index = 0
+                self.window.canvas.delete(pause_id)
+                self.draw_first_frame()
+                random_begin = False
+                pause = False
+                return
+            if clear:
+                self.grids = self.init_grids(False)
+                self.window.delete_cells()
+                clear = False
+            sleep(0.15)
+
+        self.window.canvas.delete(pause_id)
 
     def calculate_next_frame(self, other_grid_index):
-        for x in range(0, c.x_amount_cells):
-            for y in range(0, c.y_amount_cells):
+        for x in range(0, c.x_cells):
+            for y in range(0, c.y_cells):
                 alive = self.dead_or_alive(x, y)
                 self.grids[other_grid_index][x][y] = alive
 
     def draw_next_frame(self, other_grid_index):
-        for x in range(0, c.x_amount_cells):
-            for y in range(0, c.y_amount_cells):
+        for x in range(0, c.x_cells):
+            for y in range(0, c.y_cells):
                 old_grid_status = self.grids[self.grid_index][x][y]
                 new_grid_status = self.grids[other_grid_index][x][y]
                 if old_grid_status != new_grid_status:
-                    self.window.draw(x, y, new_grid_status)
+                    self.window.draw_cell(x, y, new_grid_status)
 
     def change_cell_status(self):
-        with change_alive_lock:
-            global cell_to_change_x
-            global cell_to_change_y
-            global new_cell_to_change
-            new_cell_to_change = False
+        with change_cell_status_lock:
+            global cell_to_change_x, cell_to_change_y
             alive = self.grids[self.grid_index][cell_to_change_x][cell_to_change_y]
             for i in range(0, 2):
                 self.grids[i][cell_to_change_x][cell_to_change_y] = not alive
-            self.window.draw(cell_to_change_x, cell_to_change_y, not alive)
+            self.window.draw_cell(cell_to_change_x, cell_to_change_y, not alive)
 
     def dead_or_alive(self, x: int, y: int):
         count_alive = 0
