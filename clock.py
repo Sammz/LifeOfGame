@@ -40,7 +40,7 @@ def on_click_change(x, y):
 class Clock(Thread):
 
     def __init__(self, window):
-        super().__init__()
+        super().__init__(daemon=True)
         self.window = window
         self.grids = self.init_grids(c.start_random)
         self.grid_index = 0
