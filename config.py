@@ -1,14 +1,15 @@
 dead_color = "black"
 alive_color = "green"
-pause_color = "red"
+pause_sign_color = "red"
+pause_background_color = "grey"
+pause_grid_color = "black"
 
-start_random = False
-update_time = 0.3
+x_cells = 100
+y_cells = 50
+cell_width = 15
+cell_height = cell_width
 
-x_cells = 50
-y_cells = 40
-cell_width = 20
-cell_height = 20
+offscreen_cells = 50
 
 window_width = x_cells * cell_width
 window_height = y_cells * cell_height
